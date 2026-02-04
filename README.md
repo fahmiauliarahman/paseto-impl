@@ -232,3 +232,10 @@ Where to put it (summary):
 - Cookies for web, headers for mobile/SDK.
 - **Use `v4.local`** when you need confidentiality (only the server can read claims).
 - **Use `v4.public`** when other services must verify tokens without sharing secrets.
+
+## Read more about PASETO
+
+- Official site: [paseto.io](https://paseto.io)
+- Specification: [paseto-standard/paseto-spec](https://github.com/paseto-standard/paseto-spec)
+- Reference implementation (PHP): [paragonie/paseto](https://github.com/paragonie/paseto)
+- Overview article: [What is PASETO?](https://developer.okta.com/blog/2019/05/07/what-is-paseto)
