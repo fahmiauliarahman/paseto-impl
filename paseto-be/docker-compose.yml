@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - TOKEN_ISSUER=${TOKEN_ISSUER:-paseto-be}
+      - TOKEN_AUDIENCE=${TOKEN_AUDIENCE:-api.example.com}
+      - ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL:-15m}
+      - REFRESH_TOKEN_TTL=${REFRESH_TOKEN_TTL:-168h}
+      - PASETO_V4_LOCAL_KEY=${PASETO_V4_LOCAL_KEY}
+      - PASETO_V4_PUBLIC_SEED=${PASETO_V4_PUBLIC_SEED}
+    depends_on:
+      - redis
+    networks:
+      - paseto-net
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - paseto-net
+
+networks:
+  paseto-net:
+    driver: bridge
+
+volumes:
+  redis_data:
