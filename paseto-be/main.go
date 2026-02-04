@@ -35,11 +35,12 @@ type keys struct {
 }
 
 type config struct {
-	issuer           string
-	audience         string
-	accessTokenTTL   time.Duration
-	refreshTokenTTL  time.Duration
-	tokenHashSecret  string
+	issuer             string
+	audience           string
+	accessTokenTTL     time.Duration
+	refreshTokenTTL    time.Duration
+	tokenHashSecret    string
+	corsAllowedOrigins map[string]struct{}
 }
 
 type appContext struct {
@@ -79,6 +80,8 @@ func newApp() (*fiber.App, error) {
 		config: cfg,
 		redis:  rdb,
 	}
+
+	app.Use(corsMiddleware(appCtx))
 
 	// Routes
 	app.Get("/ping", func(c fiber.Ctx) error {
@@ -135,12 +138,15 @@ func loadConfig() (config, error) {
 		hashSecret = os.Getenv("PASETO_V4_LOCAL_KEY") // fallback to PASETO key
 	}
 
+	corsOrigins := getEnvOrDefault("CORS_ALLOWED_ORIGINS", "http://localhost:5173")
+
 	return config{
-		issuer:          issuer,
-		audience:        audience,
-		accessTokenTTL:  accessTTL,
-		refreshTokenTTL: refreshTTL,
-		tokenHashSecret: hashSecret,
+		issuer:             issuer,
+		audience:           audience,
+		accessTokenTTL:     accessTTL,
+		refreshTokenTTL:    refreshTTL,
+		tokenHashSecret:    hashSecret,
+		corsAllowedOrigins: parseAllowedOrigins(corsOrigins),
 	}, nil
 }
 
@@ -149,6 +155,46 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+func parseAllowedOrigins(raw string) map[string]struct{} {
+	allowed := make(map[string]struct{})
+	for _, origin := range strings.Split(raw, ",") {
+		o := strings.TrimSpace(origin)
+		if o == "" {
+			continue
+		}
+		allowed[o] = struct{}{}
+	}
+	return allowed
+}
+
+func corsMiddleware(appCtx *appContext) fiber.Handler {
+	allowed := appCtx.config.corsAllowedOrigins
+
+	return func(c fiber.Ctx) error {
+		origin := c.Get("Origin")
+		if origin != "" {
+			if _, ok := allowed["*"]; ok || containsOrigin(allowed, origin) {
+				c.Set("Access-Control-Allow-Origin", origin)
+				c.Set("Vary", "Origin")
+				c.Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+				c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+				c.Set("Access-Control-Max-Age", "600")
+			}
+		}
+
+		if c.Method() == fiber.MethodOptions {
+			return c.SendStatus(fiber.StatusNoContent)
+		}
+
+		return c.Next()
+	}
+}
+
+func containsOrigin(allowed map[string]struct{}, origin string) bool {
+	_, ok := allowed[origin]
+	return ok
 }
 
 // Token generation
