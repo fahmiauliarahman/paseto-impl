@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 33% 98%;
+    --foreground: 222 25% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 25% 12%;
+    --primary: 214 78% 38%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 214 32% 92%;
+    --secondary-foreground: 222 25% 18%;
+    --muted: 216 24% 94%;
+    --muted-foreground: 215 18% 42%;
+    --accent: 46 90% 58%;
+    --accent-foreground: 222 30% 12%;
+    --destructive: 0 72% 52%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 214 72% 48%;
+    --radius: 14px;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: theme('fontFamily.body');
+    min-height: 100vh;
+    background-image:
+      radial-gradient(1200px 600px at 10% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+      radial-gradient(900px 480px at 95% 10%, rgba(250, 204, 21, 0.12), transparent 55%),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.95));
+  }
+
+  h1, h2, h3 {
+    font-family: theme('fontFamily.display');
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
